@@ -1,12 +1,12 @@
 FROM mongo:5.0
 
 # Installiamo Mongo Express, supervisor e strumenti per debug
-RUN apt-get update && apt-get install -y supervisor npm curl netcat-openbsd nginx && \
-    npm install -g mongo-express@0.54.0 && \
-    mkdir -p /var/log/supervisor /data/db
+RUN apt-get update && apt-get install -y supervisor npm curl netcat-openbsd nginx git && \
+    npm install -g mongo-express@0.62.0 && \
+    mkdir -p /var/log/supervisor /mongodb_data
 
 # Configuriamo permessi per la directory dei dati
-RUN chown -R mongodb:mongodb /data/db && chmod -R 755 /data/db
+RUN chown -R mongodb:mongodb /mongodb_data && chmod -R 755 /mongodb_data
 
 # Creiamo il file di configurazione per mongo-express
 RUN echo '{\n\
@@ -49,7 +49,7 @@ echo "MongoDB is up - starting mongo-express"\n\
 sleep 5\n\
 \n\
 # Inizializziamo l'utente admin in MongoDB\n\
-mongo admin --eval "db.createUser({user: \"admin\", pwd: \"password\", roles: [{role: \"root\", db: \"admin\"}]});"\n\
+mongosh admin --eval "db.createUser({user: \"admin\", pwd: \"password\", roles: [{role: \"root\", db: \"admin\"}]});"\n\
 \n\
 # Avviamo mongo-express con il file di configurazione\n\
 /usr/local/bin/mongo-express -c /etc/mongo-express-config.json -a localhost -p 8081\n\
@@ -59,10 +59,10 @@ chmod +x /usr/local/bin/start-mongo-express.sh
 # Creiamo uno script per avviare MongoDB con debug
 RUN echo '#!/bin/bash\n\
 echo "Starting MongoDB with debug..."\n\
-echo "Directory /data/db contents:"\n\
-ls -la /data/db\n\
+echo "Directory /mongodb_data contents:"\n\
+ls -la /mongodb_data\n\
 echo "Starting mongod..."\n\
-mongod --dbpath=/data/db --bind_ip_all --port 27017 --logpath=/var/log/supervisor/mongodb_debug.log --logappend\n'\
+mongod --dbpath=/mongodb_data --bind_ip_all --port 27017 --logpath=/var/log/supervisor/mongodb_debug.log --logappend\n'\
 > /usr/local/bin/start-mongodb.sh && \
 chmod +x /usr/local/bin/start-mongodb.sh
 
