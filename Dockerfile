@@ -2,7 +2,7 @@ FROM mongo:5.0
 
 # Installiamo Mongo Express, supervisor e strumenti per debug
 RUN apt-get update && apt-get install -y supervisor npm curl netcat-openbsd nginx git && \
-    npm install -g mongo-express@0.62.0 && \
+    npm install -g mongo-express && \
     mkdir -p /var/log/supervisor /mongodb_data
 
 # Configuriamo permessi per la directory dei dati
