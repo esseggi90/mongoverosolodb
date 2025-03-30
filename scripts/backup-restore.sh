@@ -5,6 +5,12 @@
 #   - Backup: ./backup-restore.sh backup <connection-string> <output-directory>
 #   - Restore: ./backup-restore.sh restore <connection-string> <backup-file>
 
+# Skip execution when the script is sourced during container initialization
+# This prevents the script from running with "numactl" as the first argument
+if [[ "$1" == "numactl" || "$0" != "$BASH_SOURCE" ]]; then
+    exit 0
+fi
+
 set -e
 
 function show_usage {

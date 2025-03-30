@@ -2,6 +2,7 @@ services:
   - type: web
     name: mongodb-standalone
     env: docker
+    dockerCommand: mongod --bind_ip 0.0.0.0 --port 27017 --dbpath /data/db --logpath /var/log/mongodb/mongod.log --logappend --auth
     plan: standard
     disk:
       name: mongodb-data
@@ -10,15 +11,23 @@ services:
     envVars:
       - key: MONGO_INITDB_DATABASE
         value: mangandoDB
+      - key: MONGO_ADMIN_USER
+        value: adminUser
       - key: MONGO_ADMIN_PASSWORD
         sync: false
       - key: MONGO_APP_USER
         value: mangandoUser
       - key: MONGO_APP_PASSWORD
         sync: false
-
-    # Health check endpoint
+    
+    # Health check configuration
     healthCheckPath: /
+    healthCheckTimeout: 10
     
     # Persistent disk storage
-    autoDeploy: false 
+    autoDeploy: false
+    
+    # Open MongoDB port
+    ports:
+      - port: 27017
+        protocol: tcp 
