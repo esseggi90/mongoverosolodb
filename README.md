@@ -2,6 +2,14 @@
 
 Questa configurazione permette di eseguire MongoDB con supporto per la ricerca vettoriale su Render.com.
 
+## Risoluzione problemi
+
+La configurazione è stata migliorata per risolvere i problemi di avvio di mongo-express:
+- Aggiunto script di attesa per MongoDB prima di avviare mongo-express
+- Migliorata la configurazione di supervisord con log dettagliati
+- Configurata l'autenticazione in modo corretto
+- Aggiunti controlli di sicurezza nel mongo-init.js
+
 ## Contenuto della cartella
 
 - `Dockerfile`: Configura un container Docker con MongoDB e Mongo Express
@@ -16,10 +24,9 @@ Questa configurazione permette di eseguire MongoDB con supporto per la ricerca v
 2. Collegati a Render.com e crea un nuovo Web Service:
    - Seleziona il repository contenente questi file
    - Seleziona "Docker" come ambiente
-   - Non è necessario modificare altre impostazioni, Render rileverà automaticamente il Dockerfile
+   - Assicurati di selezionare il piano "Starter" (o superiore) con almeno 1GB di RAM
 
 3. Configura il servizio:
-   - Assicurati che sia selezionato un piano con almeno 1GB di RAM (Piano "Starter" o superiore)
    - Nella sezione "Disks", aggiungi un disco:
      - Mount path: `/data/db`
      - Size: 10GB (o più, in base alle tue esigenze)
@@ -45,9 +52,34 @@ Modifica il file `.env` nella tua applicazione principale:
 MONGODB_URI=mongodb://mangando_user:mangando_password@NOME-SERVIZIO.onrender.com:27017/mangando
 ```
 
+## Ricerca vettoriale
+
+Per utilizzare la ricerca vettoriale, puoi eseguire query come questa:
+
+```javascript
+db.vector_examples.aggregate([
+  {
+    $vectorSearch: {
+      index: "vector_index",
+      path: "embedding",
+      queryVector: Array.from({length: 384}, () => Math.random()),
+      numCandidates: 100,
+      limit: 2
+    }
+  },
+  {
+    $project: {
+      title: 1,
+      content: 1,
+      score: { $meta: "vectorSearchScore" }
+    }
+  }
+]);
+```
+
 ## Note sulla sicurezza
 
 Per un ambiente di produzione, dovresti:
-1. Cambiare tutte le password in `.env` e `render.yaml`
-2. Limitare l'accesso al database solo dall'IP della tua applicazione
-3. Considerare l'utilizzo di MongoDB Atlas per un database gestito più robusto 
+1. Cambiare tutte le password nei file di configurazione
+2. Abilitare TLS/SSL per le connessioni
+3. Limitare l'accesso al database solo agli IP delle tue applicazioni 
