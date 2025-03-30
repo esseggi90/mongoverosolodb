@@ -41,6 +41,4 @@ services:
       sizeGB: 10
     healthCheckPath: /
     numInstances: 1
-    ports:
-      - port: 8081
-        name: mongo-express 
+    port: 80 
