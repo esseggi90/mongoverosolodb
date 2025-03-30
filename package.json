@@ -1,0 +1,17 @@
+{
+  "name": "mongodb-standalone",
+  "version": "1.0.0",
+  "description": "Standalone MongoDB for Render.com deployment",
+  "main": "scripts/healthcheck.js",
+  "scripts": {
+    "start": "node scripts/healthcheck.js",
+    "health": "node scripts/healthcheck.js",
+    "update-connection": "node scripts/update-connection.js"
+  },
+  "dependencies": {
+    "mongodb": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+} 

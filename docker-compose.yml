@@ -1,0 +1,22 @@
+version: '3.8'
+
+services:
+  mongodb:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "27017:27017"
+    environment:
+      - MONGO_INITDB_DATABASE=mangandoDB
+      - MONGO_ADMIN_PASSWORD=adminPassword
+      - MONGO_APP_USER=mangandoUser
+      - MONGO_APP_PASSWORD=userPassword
+    volumes:
+      - mongodb_data:/data/db
+      - mongodb_log:/var/log/mongodb
+    restart: unless-stopped
+
+volumes:
+  mongodb_data:
+  mongodb_log: 

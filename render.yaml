@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: mongodb-standalone
+    env: docker
+    plan: standard
+    disk:
+      name: mongodb-data
+      mountPath: /data/db
+      sizeGB: 10
+    envVars:
+      - key: MONGO_INITDB_DATABASE
+        value: mangandoDB
+      - key: MONGO_ADMIN_PASSWORD
+        sync: false
+      - key: MONGO_APP_USER
+        value: mangandoUser
+      - key: MONGO_APP_PASSWORD
+        sync: false
+
+    # Health check endpoint
+    healthCheckPath: /
+    
+    # Persistent disk storage
+    autoDeploy: false 
