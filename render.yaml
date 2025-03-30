@@ -2,7 +2,7 @@ services:
   - type: web
     name: mongodb-standalone
     env: docker
-    dockerCommand: mongod --bind_ip 0.0.0.0 --port 27017 --dbpath /data/db --logpath /var/log/mongodb/mongod.log --logappend --auth
+    dockerCommand: mongod --bind_ip 0.0.0.0 --port 27017 --dbpath /data/db --logpath /var/log/mongodb/mongod.log --logappend --auth --tlsMode allowTLS --tlsCertificateKeyFile /etc/mongodb/ssl/mongodb.pem
     plan: standard
     disk:
       name: mongodb-data

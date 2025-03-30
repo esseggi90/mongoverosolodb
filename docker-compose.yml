@@ -17,7 +17,7 @@ services:
       - mongodb_data:/data/db
       - mongodb_log:/var/log/mongodb
     restart: unless-stopped
-    command: mongod --bind_ip 0.0.0.0 --port 27017 --dbpath /data/db --logpath /var/log/mongodb/mongod.log --logappend
+    command: mongod --bind_ip 0.0.0.0 --port 27017 --dbpath /data/db --logpath /var/log/mongodb/mongod.log --logappend --tlsMode allowTLS --tlsCertificateKeyFile /etc/mongodb/ssl/mongodb.pem
 
 volumes:
   mongodb_data:
