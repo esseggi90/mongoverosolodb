@@ -1,9 +1,12 @@
 FROM mongo:latest
 
-# Installiamo Mongo Express, supervisor e wait-for-it per gestire meglio l'avvio dei servizi
+# Installiamo Mongo Express, supervisor e strumenti per debug
 RUN apt-get update && apt-get install -y supervisor npm curl netcat-openbsd && \
     npm install -g mongo-express && \
-    mkdir -p /var/log/supervisor
+    mkdir -p /var/log/supervisor /data/db
+
+# Configuriamo permessi per la directory dei dati
+RUN chown -R mongodb:mongodb /data/db && chmod -R 755 /data/db
 
 # Creiamo uno script d'avvio per mongo-express con attesa per MongoDB
 RUN echo '#!/bin/bash\n\
@@ -18,6 +21,14 @@ exec /usr/local/bin/mongo-express\n'\
 > /usr/local/bin/start-mongo-express.sh && \
 chmod +x /usr/local/bin/start-mongo-express.sh
 
+# Creiamo uno script per avviare MongoDB con debug
+RUN echo '#!/bin/bash\n\
+echo "Starting MongoDB with debug..."\n\
+ls -la /data/db\n\
+mongod --dbpath=/data/db --bind_ip_all --logpath=/var/log/supervisor/mongodb_debug.log --logappend\n'\
+> /usr/local/bin/start-mongodb.sh && \
+chmod +x /usr/local/bin/start-mongodb.sh
+
 # Copiamo i file di configurazione
 COPY mongo-init.js /docker-entrypoint-initdb.d/
 
@@ -28,7 +39,7 @@ RUN echo "[supervisord]" > /etc/supervisor/conf.d/supervisord.conf && \
     echo "logfile_maxbytes=50MB" >> /etc/supervisor/conf.d/supervisord.conf && \
     echo "" >> /etc/supervisor/conf.d/supervisord.conf && \
     echo "[program:mongodb]" >> /etc/supervisor/conf.d/supervisord.conf && \
-    echo "command=mongod --setParameter featureCompatibilityVersion=7.0 --setParameter vectorSearchEnabled=true --bind_ip_all" >> /etc/supervisor/conf.d/supervisord.conf && \
+    echo "command=/usr/local/bin/start-mongodb.sh" >> /etc/supervisor/conf.d/supervisord.conf && \
     echo "autostart=true" >> /etc/supervisor/conf.d/supervisord.conf && \
     echo "autorestart=true" >> /etc/supervisor/conf.d/supervisord.conf && \
     echo "priority=10" >> /etc/supervisor/conf.d/supervisord.conf && \
