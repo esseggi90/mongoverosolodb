@@ -24,9 +24,11 @@ RUN apt-get update && apt-get install -y openssl && \
         -days 3650 && \
     # Create PEM file (server cert + key)
     cat /etc/mongodb/ssl/mongodb.key /etc/mongodb/ssl/mongodb.crt > /etc/mongodb/ssl/mongodb.pem && \
-    # Set permissions
+    # Set permissions - make sure MongoDB user can read these files
     chmod 600 /etc/mongodb/ssl/mongodb.pem /etc/mongodb/ssl/mongodb.key /etc/mongodb/ssl/ca.key && \
-    chmod 644 /etc/mongodb/ssl/ca.crt /etc/mongodb/ssl/mongodb.crt
+    chmod 644 /etc/mongodb/ssl/ca.crt /etc/mongodb/ssl/mongodb.crt && \
+    # Since MongoDB runs as the mongodb user, ensure it can access all files
+    chown -R mongodb:mongodb /etc/mongodb /data/db /var/log/mongodb
 
 # Copy configuration file
 COPY ./config/mongod.conf /etc/mongod.conf
@@ -40,7 +42,11 @@ COPY ./scripts/healthcheck.js /usr/local/bin/
 COPY ./scripts/update-connection.js /usr/local/bin/
 
 # Make scripts executable
-RUN chmod +x /usr/local/bin/backup-restore.sh
+RUN chmod +x /usr/local/bin/backup-restore.sh && \
+    # Ensure MongoDB user can access all configuration and scripts
+    chown mongodb:mongodb /etc/mongod.conf && \
+    chmod 644 /etc/mongod.conf && \
+    chown -R mongodb:mongodb /docker-entrypoint-initdb.d/
 
 # Expose the MongoDB port
 EXPOSE 27017
